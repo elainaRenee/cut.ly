@@ -44,9 +44,9 @@ Some initial observations about the data include:
 Because of these observations, a NoSQL database seems like a good choice. We do not require relationships between objects, 
 but we do require superior performance and future ability to scale efficiently as the number of short urls increases.
 
-#### Hashing Algorithm
+#### Hashing 
 
-The requirements dictate that we must generate ids that are not easily guessable. Therefore, some possible solutions for the hashing algorithm include:
+The requirements dictate that we must generate ids that are not easily guessable. Therefore, some possible solutions for hashing include:
 
 1. Create a random alphanumeric string using a hashing algorithm. Store this string in the database with a unique index. If a DuplicateKeyException occurs, keep retrying until a unique value is found.
 2. Create a unique id for each long url. Use an encoding algorithm to encode this value to a unique alphanumeric string.
