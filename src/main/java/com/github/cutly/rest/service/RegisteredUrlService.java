@@ -12,6 +12,7 @@ import org.hashids.Hashids;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -104,8 +105,8 @@ public class RegisteredUrlService {
         List<String> accessDates = new ArrayList<String>();
         for (Date accessDate : url.getAccessDates()) {
             // format date
-            SimpleDateFormat dt = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss");
-            String date = dt.format(accessDate);
+            DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+            String date = df.format(accessDate);
             accessDates.add(date);
         }
         return new UrlUsage(url.getAccessDates().size(), accessDates);
@@ -125,8 +126,8 @@ public class RegisteredUrlService {
         for (Date accessDate : url.getAccessDates()) {
             if (accessDate.after(benchmark) || accessDate.equals(benchmark)) {
                 // format date
-                SimpleDateFormat dt = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss");
-                String date = dt.format(accessDate);
+                DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+                String date = df.format(accessDate);
                 accessDates.add(date);
             }
         }
