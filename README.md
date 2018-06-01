@@ -32,6 +32,33 @@ Shortcuts
 
 ## Design Decisions
 
+#### Database
+
+Some initial observations about the data include:
+
+1. We need to store millions of records
+2. Read operations must be very fast (<10ms)
+3. Most likely, read operations will occur much more frequently than insert operations
+4. Data model will be very simple with no relationships between objects
+
+Because of these observations, a NoSQL database seems like a good choice. We do not require relationships between objects, 
+but we do require superior performance and future ability to scale efficiently as the number of short urls increases.
+
+#### Hashing Algorithm
+
+The requirements dictate that we must generate ids that are not easily guessable. Therefore, some possible solutions for the hashing algorithm include:
+
+1. Create a random alphanumeric string using a hashing algorithm. Store this string in the database with a unique index. If a DuplicateKeyException occurs, keep retrying until a unique value is found.
+2. Create a unique id for each long url. Use an encoding algorithm to encode this value to a unique alphanumeric string.
+
+For best performance, it would be ideal to have few to zero collisions. With solution 1, collisions could occur frequently as our data scales.
+Therefore, solution two may be more optimal. It is possible to do this by keeping a count of 
+all long urls and increasing this count each time a new long url is entered into the system. We will persist
+this count with each document so it will act similarly to a unique, auto-incrementing
+id in a SQL database. After we increment the count, we will encode the value to generate a
+unique string (see https://github.com/jiecao-fm/hashids-java) as our short url. When we receive a redirect
+request for a long url, we will decode the short url and look up the long url by the 
+unique id.
 
 ## Getting Started
 
@@ -40,7 +67,7 @@ To build and run the application with Docker:
     docker-comopose up
 
 To build and run the application without Docker, you will need to install MongoDB.
-You can find instructions here on how to install MongoDB: https://docs.mongodb.com/manual/administration/install-community/.
+You can find instructions here on how to install MongoDB here: https://docs.mongodb.com/manual/administration/install-community/.
 Once MongoDB is up and running, you can build and run the application with the following commands: 
  
     mvn clean install
@@ -56,17 +83,17 @@ The web server will run on port 8080 by default.
 POST /api/v1/urls
 ```
 
-##### Description: 
+#### Description: 
 
 generates a unique hash from a long url
 
-##### Request: 
+#### Request: 
 ```
 {
   "longUrl" : "www.google.com"
 }
 ```
-##### Response:
+#### Response:
 ```
 {
   "hash": "jR"
@@ -76,7 +103,7 @@ generates a unique hash from a long url
 ```
 GET /api/v1/urls/{hash}
 ```
-##### Description: 
+#### Description: 
 
 redirects user to a long url
 
@@ -84,10 +111,10 @@ redirects user to a long url
 ```
 GET /api/v1/urls/{hash}/usage
 ```
-##### Description: 
+#### Description: 
 
 returns all dates a short url has been visited and the total count
-##### Response:
+#### Response:
 ```
 {
   "totalUsage": "1",
@@ -98,11 +125,11 @@ returns all dates a short url has been visited and the total count
 ```
 GET /api/v1/urls/{hash}/usage?days=7
 ```
-##### Description: 
+#### Description: 
 
 returns the dates a short url has been visited within the last x days and the total count
      
-##### Response:
+#### Response:
 ```
 {
   "totalUsage": "2",
@@ -119,6 +146,6 @@ To insert dummy data into MongoDB for performance testing, run the DataLoadTest.
 This will generate 3,000,000 short urls. A hash that can be used for testing is kqwWY. 
 To view redirect time, see the log output. Initial testing shows redirect time is typically between 5ms to 10ms.
 
-![Alt text](logOutput.png?raw=true)f
+![Alt text](logOutput.png?raw=true)
 
 
